@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en" class="transition-colors duration-300">
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta charset="UTF-8" />
+    <!-- refresh html page every 2s -->
+    <!-- <meta http-equiv="refresh" content="6" /> -->
+    <!-- <script> -->
+    <!--   tailwind.config = { -->
+    <!--     darkMode: "class", // enable dark mode via 'class' strategy -->
+    <!--   }; -->
+    <!-- </script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
+    <!---->
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <title>Exami - Your place to create/pass exams</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Configure Tailwind's dark mode to use class
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              // You can customize these colors if needed
+              primary: {
+                light: "#3b82f6",
+                dark: "#60a5fa",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="h-screen font-kanit bg-slate-200 dark:bg-black p-1">
+    <main
+      class="w-full h-full flex flex-col font-kanit bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg text-black  dark:text-white"
+    >
+      <!-- navebar -->
+      <nav class="w-full px-3 py-4 border-b border-slate-300 dark:border-zinc-700/50">
+        <!-- logo "Exami" -->
+        <!-- theme toggle button -->
+        <!-- signup & login buttons -->
+        <!-- logo "Exami" -->
+        <button
+          id="theme-toggle"
+          class="px-3 py-1 rounded-lg border border-emerald-600 bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white focus:outline-none"
+        >
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </nav>
+      <div class="flex-1 flex">
+        <!-- sidebar: mybe we can put recent exams and some data there. -->
+        <div
+          class="hidden md:inline h-full md:w-52 px-2 py-3 border-r border-slate-300 dark:border-zinc-700/50"
+        >
+          sidebar
+          <!-- put the navigation here -->
+          <!-- mention our names -->
+        </div>
+        <!-- dynamic preview -->
+        <section class="flex-1 border border-slate-300 bg-slate-200 dark:border-zinc-600 dark:bg-zinc-700 m-1 md:m-4">
+          <div class="w-full h-full flex items-center justify-center">
+            <div id="start-container" class="space-y-2 text-center">
+              <h3 class="text-xl">Wellcome to Exami</h3>
+              <p class="text-xl font-sora">Your place to create/pass exams</p>
+              <button
+                id="start-button"
+                class="inline rounded-lg border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white px-3 py-1 focus:outline-none"
+              >
+                Get Started
+              </button>
+            </div>
+            <div id="register-form-container" class="hidden w-full h-full flex items-center justify-center"
+            >
+            <form id="signup-form" class="max-w-xl border-4 border-yellow-500">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email"placeholder="xxxx@gmail.com" required>
+              <label for="nom">Nom</label>
+              <input type="text" id="nom" name="nom" placeholder="xxxx" required>
+              <label for="prenom">Prénom</label>
+              <input type="text" id="prenom" name="prenom" placeholder="xxxx" required>
+              <label for="dateNaissance">Date de naissance</label>
+              <input type="date" id="dateNaissance" name="dateNaissance" required>
+              <label for="sexe">Sexe</label>
+              <select id="sexe" name="sexe" required>
+                <option value="">Sélectionner</option>
+                <option value="homme">Homme</option>
+                <option value="femme">Femme</option>
+                <option value="autre">Autre</option>
+              </select>
+              <label for="etablissement">Établissement</label>
+              <select id="etablissement" name="etablissement" required>
+                <option value="">Sélectionner votre etablissement</option>
+                <option value="fs">FS</option>
+                <option value="ensa">ENSA</option>
+                <option value="ens">ENS</option>
+                <option value="fst">FST</option>
+                <option value="est">EST</option>
+                <option value="ensg">ENSG</option>
+              </select>
+              <label for="filiere">Filière</label>
+              <select id="filiere" name="filiere" required>
+                <option value="">Sélectionner votre filière</option>
+                <option value="SM">SM</small></option>
+                <option value="SMI">SMI</option>
+                <option value="SMA">SMA</option>
+                <option value="SMC">SMC</option>
+                <option value="SMP">SMP</option>
+                <option value="SVT">SVT</option>
+                <option value="BG">BG</option>
+                <option value="BIO">BIO</option>
+                <option value="CH">CH</option>
+                <option value="GEO">GRO</option>
+                <option value="PC">PC</option>
+                <option value="INFO">INFO</option>
+              </select>
+              <label for="userType" >Type d'utilisateur</label>
+              <select id="userType" name="userType" required>
+                <option value=""> Sélectionner </option>
+                <option value="etudiant">Étudiant</option>
+                <option value="enseignant">Enseignant</option>
+              </select>
+              <button
+                id="signup-button"
+                type="submit"
+                class="inline rounded-lg border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white px-3 py-1 focus:outline-none"
+              >
+                Sign Up
+              </button>
+            </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="main.js"></script>
+  </body>
+</html>

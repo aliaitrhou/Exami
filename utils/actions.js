@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 dotenv.config();
 
-const secret_key = process.env.SECRET_KEY;
+const secret_key = process.env.JWT_SECRET;
 
 export function generateToken(payload) {
   const token = jwt.sign(payload, secret_key, { expiresIn: "1h" });

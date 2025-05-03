@@ -1,3 +1,4 @@
+import db from "../database/db.js";
 import { createNewUser } from "./actions.js";
 
 const signupHandler = async (req, res) => {
