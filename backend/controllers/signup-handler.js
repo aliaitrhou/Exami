@@ -1,9 +1,9 @@
-import db from "../database/db.js";
-import { createNewUser } from "./actions.js";
+import db from "../../database/db.js";
+import { createNewUser } from "../actions.js";
 
 const signupHandler = async (req, res) => {
-  const data = req.body;
-  const { email } = data;
+  const { userData } = req.body;
+  const { email } = userData;
 
   try {
     // check for user in db using unique properties.
@@ -12,17 +12,12 @@ const signupHandler = async (req, res) => {
     ]);
 
     if (rows.length > 0) {
-      return res.status(409).send("User already exists");
+      return res.status(409).send({
+        message: "User already exists",
+      });
     }
 
-    const output = await createNewUser(data);
-
-    res.cookie("token", output.accessToken, {
-      httpOnly: true,
-      secure: false, // NOTE: flip this to true in production (HTTPS).
-      sameSite: "lax",
-      maxAge: 60 * 60 * 1000,
-    });
+    const output = await createNewUser(userData);
 
     return res.status(output.status).send({
       message: output.text,

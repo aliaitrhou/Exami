@@ -6,6 +6,7 @@ dotenv.config();
 
 const secret_key = process.env.JWT_SECRET;
 
+// genearte jwt token.
 export function generateToken(payload) {
   const token = jwt.sign(payload, secret_key, { expiresIn: "1h" });
   return token;
@@ -13,8 +14,6 @@ export function generateToken(payload) {
 
 // create new user in database.
 export const createNewUser = async (userData) => {
-  // generate access token
-  const accessToken = generateToken(userData);
   try {
     // hash user password.
     const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -42,8 +41,7 @@ export const createNewUser = async (userData) => {
 
     return {
       status: 200,
-      text: "User seccessfully created!",
-      accessToken,
+      text: "Account created, please log in",
     };
   } catch (err) {
     console.error("Error creating new user: ", err);

@@ -1,50 +1,82 @@
-// get all DOM elements, and sort them in order /sidebar/navbar/dynamic-preview
-const themeToggleButton = document.getElementById("theme-toggle");
-const htmlElement = document.documentElement;
+import { initRouter, navigateTo } from "./utils/router.js";
+import {
+  getGithubProfiles,
+  checkAuthStatus,
+  logout,
+} from "./utils/client-actions.js";
 
-// theme toggling
-// TODO: save theme value in local storage.
-const rootElement = document.documentElement;
-let darkMode = false;
-themeToggleButton.addEventListener("click", () => {
-  darkMode = !darkMode;
+// render alerts ui inside navbar.
+export function renderAlert(message, type) {
+  const alertsElement = document.getElementById("alerts");
 
-  if (darkMode) {
-    rootElement.classList.add("dark");
-    themeToggleButton.innerHTML = `<i class="fa-regular fa-sun"></i>`;
-  } else {
-    rootElement.classList.remove("dark");
-    themeToggleButton.innerHTML = `
-  <i class="fa-solid fa-moon"></i>
-  `;
-  }
-});
+  const alertClass =
+    type === "error"
+      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+      : type === "success"
+        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
 
-// start the experince:
-const startButtonElement = document.getElementById("start-button");
-const startContainerElement = document.getElementById("start-container");
-const registerFormContainer = document.getElementById(
-  "register-form-container",
-);
+  alertsElement.className = `inline-block px-4 py-1 rounded ${alertClass}`;
+  alertsElement.textContent = message;
 
-const getStarted = () => {
-  startContainerElement.classList.add("hidden");
-  registerFormContainer.classList.remove("hidden");
+  setTimeout(() => {
+    alertsElement.className = "hidden";
+    alertsElement.textContent = "";
+  }, 5000);
+}
 
-  const signupForm = document.getElementById("signup-form");
+// light/dark modes
+function changeTheme() {
+  const themeToggleButton = document.getElementById("theme-toggle");
+  const rootElement = document.documentElement;
+  const switchButton = document.getElementById("switch-button");
 
-  signupForm.addEventListener("submit", (event) => {
-    event.preventDefault();
+  let darkMode = true;
+  rootElement.classList.add("dark");
+  // switchButton.innerHTML = `<i class="fa-regular fa-sun"></i>`;
 
-    const formData = new FormData(signupForm);
+  themeToggleButton.addEventListener("click", () => {
+    darkMode = !darkMode;
 
-    const data = Object.fromEntries(formData.entries());
-
-    console.log("Form submitted! with this data: ", data);
-    //TODO: call signup() with data.
+    if (darkMode) {
+      rootElement.classList.add("dark");
+      themeToggleButton.classList.add("justify-end");
+      // switchButton.innerHTML = `<i class="fa-regular fa-sun"></i>`;
+    } else {
+      rootElement.classList.remove("dark");
+      themeToggleButton.classList.remove("justify-end");
+      // switchButton.innerHTML = `<i class="fa-solid fa-moon"></i>`;
+    }
   });
-};
+}
 
-// call getStarted() function if the user clicks 'get started' or 'signup/login' buttons
-startButtonElement.addEventListener("click", getStarted);
+export function updateNavbarForLoggedInUser(user) {
+  const navButtonsContainer = document.getElementById("nav-btns");
+  navButtonsContainer.className = "flex gap-2 items-center";
+  navButtonsContainer.innerHTML = `
+   <span class="mr-4">${user.firstname} ${user.lastname}</span>
+    <button
+      id="logout-btn"
+      class="px-3 py-1 rounded-md bg-emerald-500 text-white border border-emerald-600 dark:border-violet-400 dark:bg-violet-500 hover:bg-emerald-600 dark:hover:bg-violet-600"
+    >
+      Logout
+    </button>
+  `;
 
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    logout();
+  });
+}
+
+function startExami() {
+  changeTheme();
+  getGithubProfiles();
+  checkAuthStatus();
+  initRouter();
+
+  // check if hash exist in url "like #about"  if not path is "/home"
+  const path = window.location.hash.substring(1) || "/home";
+  navigateTo(path);
+}
+
+document.addEventListener("DOMContentLoaded", startExami);

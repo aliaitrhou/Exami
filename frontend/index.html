@@ -5,20 +5,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta charset="UTF-8" />
-    <!-- refresh html page every 2s -->
-    <!-- <meta http-equiv="refresh" content="6" /> -->
-    <!-- <script> -->
-    <!--   tailwind.config = { -->
-    <!--     darkMode: "class", // enable dark mode via 'class' strategy -->
-    <!--   }; -->
-    <!-- </script> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-    <!---->
-    <script>
-      tailwind.config = {
-        darkMode: "class",
-      };
-    </script>
+    <!-- refresh html page every 8s -->
+    <!-- <meta http-equiv="refresh" content="8" /> -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -30,125 +18,82 @@
     <title>Exami - Your place to create/pass exams</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Configure Tailwind's dark mode to use class
       tailwind.config = {
         darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              // You can customize these colors if needed
-              primary: {
-                light: "#3b82f6",
-                dark: "#60a5fa",
-              },
-            },
-          },
-        },
       };
     </script>
   </head>
-  <body class="h-screen font-kanit bg-slate-200 dark:bg-black p-1">
+  <body class="h-screen font-kanit bg-gray-100 dark:bg-black p-1">
     <main
-      class="w-full h-full flex flex-col font-kanit bg-slate-100 dark:bg-zinc-800 border border-slate-300 dark:border-zinc-700 rounded-lg text-black  dark:text-white"
+      class="w-full h-full flex flex-col font-kanit bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-black dark:text-white"
     >
       <!-- navebar -->
-      <nav class="w-full px-3 py-4 border-b border-slate-300 dark:border-zinc-700/50">
-        <!-- logo "Exami" -->
-        <!-- theme toggle button -->
-        <!-- signup & login buttons -->
-        <!-- logo "Exami" -->
-        <button
-          id="theme-toggle"
-          class="px-3 py-1 rounded-lg border border-emerald-600 bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white focus:outline-none"
-        >
-          <i class="fa-solid fa-moon"></i>
-        </button>
+      <nav
+        class="w-full px-3 py-4 border-b border-gray-300/50 dark:border-zinc-700/50 border flex justify-between items-center"
+      >
+        <div class="flex items-center">
+          <a href="/">
+            <img src="../public/images/logo.png" alt="Exami Logo" class="" />
+          </a>
+        </div>
+
+        <div
+          id="alerts"
+          class="hidden text-center py-1 px-3 bg-white/50 rounded-lg text-sm"
+        ></div>
+
+        <div id="nav-btns" class="flex gap-3">
+          <a
+            href="#signup"
+            class="px-3 py-1 rounded-md bg-emerald-500 text-white border border-emerald-600 dark:border-violet-400 dark:bg-violet-500 hover:bg-emerald-600 dark:hover:bg-violet-600"
+          >
+            Sign Up
+          </a>
+          <a
+            href="#login"
+            class="px-3 py-1 rounded-md border border-emerald-500 text-emerald-600 dark:border-violet-500 dark:text-violet-400 hover:bg-gray-100 dark:hover:bg-zinc-700"
+          >
+            Login
+          </a>
+        </div>
       </nav>
+
       <div class="flex-1 flex">
         <!-- sidebar: mybe we can put recent exams and some data there. -->
         <div
-          class="hidden md:inline h-full md:w-52 px-2 py-3 border-r border-slate-300 dark:border-zinc-700/50"
+          class="hidden md:flex flex-col h-full md:w-52 px-2 py-6 border-r border-gray-300/50 dark:border-zinc-700/50"
         >
-          sidebar
-          <!-- put the navigation here -->
+          <!-- TODO: (maryam) -->
+          <!-- put the navigation (links) here which well conrol the preview -->
+
+          <!--theme toggle -->
+          <div class="flex-1"></div>
+          <div
+            class="w-full font-sora font-light text-sm flex flex-row items-center justify-center gap-2 text-zinc-500 dark:text-zinc-200"
+          >
+            <span> Light </span>
+            <button
+              id="theme-toggle"
+              class="w-12 p-[3px] flex flex-row items-center justify-end rounded-full bg-black dark:bg-white focus:outline-none"
+            >
+              <span
+                id="switch-button"
+                class="h-4 w-4 rounded-full bg-white dark:bg-black"
+              />
+            </button>
+            <span> Dark </span>
+          </div>
           <!-- mention our names -->
         </div>
         <!-- dynamic preview -->
-        <section class="flex-1 border border-slate-300 bg-slate-200 dark:border-zinc-600 dark:bg-zinc-700 m-1 md:m-4">
-          <div class="w-full h-full flex items-center justify-center">
-            <div id="start-container" class="space-y-2 text-center">
-              <h3 class="text-xl">Wellcome to Exami</h3>
-              <p class="text-xl font-sora">Your place to create/pass exams</p>
-              <button
-                id="start-button"
-                class="inline rounded-lg border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white px-3 py-1 focus:outline-none"
-              >
-                Get Started
-              </button>
-            </div>
-            <div id="register-form-container" class="hidden w-full h-full flex items-center justify-center"
-            >
-            <form id="signup-form" class="max-w-xl border-4 border-yellow-500">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email"placeholder="xxxx@gmail.com" required>
-              <label for="nom">Nom</label>
-              <input type="text" id="nom" name="nom" placeholder="xxxx" required>
-              <label for="prenom">Prénom</label>
-              <input type="text" id="prenom" name="prenom" placeholder="xxxx" required>
-              <label for="dateNaissance">Date de naissance</label>
-              <input type="date" id="dateNaissance" name="dateNaissance" required>
-              <label for="sexe">Sexe</label>
-              <select id="sexe" name="sexe" required>
-                <option value="">Sélectionner</option>
-                <option value="homme">Homme</option>
-                <option value="femme">Femme</option>
-                <option value="autre">Autre</option>
-              </select>
-              <label for="etablissement">Établissement</label>
-              <select id="etablissement" name="etablissement" required>
-                <option value="">Sélectionner votre etablissement</option>
-                <option value="fs">FS</option>
-                <option value="ensa">ENSA</option>
-                <option value="ens">ENS</option>
-                <option value="fst">FST</option>
-                <option value="est">EST</option>
-                <option value="ensg">ENSG</option>
-              </select>
-              <label for="filiere">Filière</label>
-              <select id="filiere" name="filiere" required>
-                <option value="">Sélectionner votre filière</option>
-                <option value="SM">SM</small></option>
-                <option value="SMI">SMI</option>
-                <option value="SMA">SMA</option>
-                <option value="SMC">SMC</option>
-                <option value="SMP">SMP</option>
-                <option value="SVT">SVT</option>
-                <option value="BG">BG</option>
-                <option value="BIO">BIO</option>
-                <option value="CH">CH</option>
-                <option value="GEO">GRO</option>
-                <option value="PC">PC</option>
-                <option value="INFO">INFO</option>
-              </select>
-              <label for="userType" >Type d'utilisateur</label>
-              <select id="userType" name="userType" required>
-                <option value=""> Sélectionner </option>
-                <option value="etudiant">Étudiant</option>
-                <option value="enseignant">Enseignant</option>
-              </select>
-              <button
-                id="signup-button"
-                type="submit"
-                class="inline rounded-lg border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white px-3 py-1 focus:outline-none"
-              >
-                Sign Up
-              </button>
-            </form>
-            </div>
-          </div>
+        <section
+          id="dynamic-preview"
+          class="flex-1 border border-gray-300/50 bg-white dark:border-zinc-700/50 dark:bg-zinc-800 m-1 md:m-6 xl:m-8"
+        >
+          <!-- render previews -->
         </section>
       </div>
     </main>
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>
