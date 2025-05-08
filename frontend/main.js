@@ -1,31 +1,9 @@
 import { initRouter, navigateTo } from "./utils/router.js";
-import { renderPreview } from "./previews.js";
-
-// const startButton = showStartPage(dynamicPreview);
-//
-// let loginStatus;
-// startButton.addEventListener("click", async () => {
-//   const signupStatusPromise = showSignupForm(dynamicPreview);
-//   const signupStatus = await signupStatusPromise;
-//
-//   renderAlert(signupStatus);
-//   if (signupStatus.alertType === "Success") {
-//     const loginStatusPromise = showLoginForm(dynamicPreview);
-//     loginStatus = await loginStatusPromise;
-//   }
-//
-//   console.log("login status are : ", loginStatus);
-//
-//   renderAlert(loginStatus);
-//
-//   if (loginStatus.logedIn) {
-//     if (loginStatus.userInfo.role === "teacher") {
-//       teacherDashboard(dynamicPreview);
-//     } else {
-//       teacherDashboard(dynamicPreview);
-//     }
-//   }
-// });
+import {
+  getGithubProfiles,
+  checkAuthStatus,
+  logout,
+} from "./utils/client-actions.js";
 
 // render alerts ui inside navbar.
 export function renderAlert(message, type) {
@@ -38,13 +16,13 @@ export function renderAlert(message, type) {
         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
         : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
 
-  alertsElement.className = `inline-block px-4 py-2 rounded ${alertClass}`;
+  alertsElement.className = `inline-block px-4 py-1 rounded ${alertClass}`;
   alertsElement.textContent = message;
 
   setTimeout(() => {
     alertsElement.className = "hidden";
     alertsElement.textContent = "";
-  }, 3000);
+  }, 5000);
 }
 
 // light/dark modes
@@ -72,8 +50,28 @@ function changeTheme() {
   });
 }
 
+export function updateNavbarForLoggedInUser(user) {
+  const navButtonsContainer = document.getElementById("nav-btns");
+  navButtonsContainer.className = "flex gap-2 items-center";
+  navButtonsContainer.innerHTML = `
+   <span class="mr-4">${user.firstname} ${user.lastname}</span>
+    <button
+      id="logout-btn"
+      class="px-3 py-1 rounded-md bg-emerald-500 text-white border border-emerald-600 dark:border-violet-400 dark:bg-violet-500 hover:bg-emerald-600 dark:hover:bg-violet-600"
+    >
+      Logout
+    </button>
+  `;
+
+  document.getElementById("logout-btn").addEventListener("click", () => {
+    logout();
+  });
+}
+
 function startExami() {
   changeTheme();
+  getGithubProfiles();
+  checkAuthStatus();
   initRouter();
 
   // check if hash exist in url "like #about"  if not path is "/home"

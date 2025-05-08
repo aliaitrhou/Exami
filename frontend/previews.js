@@ -1,5 +1,7 @@
-import { login, signup } from "./utils/client-actions.js";
+import { renderAlert, updateNavbarForLoggedInUser } from "./main.js";
+import { login, signup, logout } from "./utils/client-actions.js";
 import { navigateTo } from "./utils/router.js";
+
 const previewContainer = document.getElementById("dynamic-preview");
 
 export const showStartPage = () => {
@@ -165,6 +167,7 @@ export const showLoginForm = () => {
 
   const loginForm = document.getElementById("login-form");
   const formButtonElement = document.getElementById("login-button");
+  const navButtonsContainer = document.getElementById("nav-btns");
 
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -185,7 +188,9 @@ export const showLoginForm = () => {
     formButtonElement.innerText = `Log In`;
 
     console.log("(login) status is :", status);
-    if (status.logedIn) {
+    renderAlert(status.alertMessage, status.alertType);
+    if (status.loggedIn) {
+      updateNavbarForLoggedInUser(status.userInfo);
       switch (status.userInfo.type) {
         case "student":
           navigateTo("student-dashboard");
