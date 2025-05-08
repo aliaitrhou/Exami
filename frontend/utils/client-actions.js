@@ -1,3 +1,6 @@
+import { updateNavbarForLoggedInUser, renderAlert } from "../main.js";
+import { navigateTo } from "./router.js";
+
 // signup endpoint
 export const signup = async (userData) => {
   console.log("user data is : ", userData);
@@ -19,20 +22,20 @@ export const signup = async (userData) => {
       console.log("User already exist");
       return {
         alertMessage: result.message,
-        alertType: "Error",
+        alertType: "error",
       };
     }
 
     return {
       alertMessage: result.message,
-      alertType: "Success",
+      alertType: "success",
     };
   } catch (err) {
     console.log("error signing up");
     console.error("error while signing up, error: ", err);
     return {
       alertMessage: "Field to create accout, please try again!",
-      alertType: "Error",
+      alertType: "error",
     };
   }
 };
@@ -52,12 +55,9 @@ export const login = async (data) => {
 
     if (!res.ok) {
       console.log("response was not okey!");
-      if (res.status == 401) {
-        console.log(result.message);
-      }
       return {
         alertMessage: result.message,
-        alertType: "Error",
+        alertType: "error",
       };
     }
 
@@ -66,12 +66,13 @@ export const login = async (data) => {
     if (result.isLogedIn) {
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("userType", result.user.type);
+      localStorage.setItem("user", JSON.stringify(result.user));
     }
 
     return {
       alertMessage: result.message,
-      alertType: "Success",
-      logedIn: result.isLogedIn,
+      alertType: "success",
+      loggedIn: result.isLogedIn,
       userInfo: result.user,
     };
   } catch (e) {
@@ -86,17 +87,50 @@ export function isLoggedIn() {
 }
 
 export function getUserType() {
-  return localStorage.getItem("userType") || "guest"; // fallback
+  return localStorage.getItem("userType") || "guest";
 }
 
-// TODO: (douae):
-// logout user
-// remove user form the localstorage
-export const logout = () => {};
+export function getUser() {
+  const userJson = localStorage.getItem("user");
+  return userJson ? JSON.parse(userJson) : null;
+}
+
+// Log out the current user
+export function logout() {
+  fetch("/api/auth/logout", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      localStorage.removeItem("user");
+      console.log("logout data :", data);
+      renderAlert(data.message, "success");
+      window.location.reload();
+      // navigateTo("home");
+    })
+    .catch((err) => console.error("Logout failed", err));
+}
+
+export function checkAuthStatus() {
+  fetch("/api/auth/check")
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.isLoggedIn) {
+        const user = getUser();
+        updateNavbarForLoggedInUser(user);
+        if (user.type === "student") {
+          navigateTo("student-dashboard");
+        } else {
+          navigateTo("teacher-dashboard");
+        }
+      } else {
+        navigateTo("login");
+      }
+    })
+    .catch((error) => console.error(error));
+}
 
 export const getGithubProfiles = () => {
-  // TODO: (maryam):
-  // - fetch our data from github.
-  // - use some github api to accomplish that.
   console.log("git out github profiles...");
 };

@@ -18,14 +18,13 @@ function authMiddleware(req, res, next) {
   }
 }
 
-// to protect all routes except public ones.
 export function globalAuthMiddleware(req, res, next) {
-  const publicRoutes = ["/api/login", "/api/signup"];
+  const publicRoutes = ["/api/login", "/api/signup", "/api/auth/check"];
 
-  if (publicRoutes.includes(req.path)) {
-    return next(); // skip auth
+  // Only apply auth to API routes
+  if (req.path.startsWith("/api") && !publicRoutes.includes(req.path)) {
+    return authMiddleware(req, res, next);
   }
 
-  return authMiddleware(req, res, next);
+  next();
 }
-
