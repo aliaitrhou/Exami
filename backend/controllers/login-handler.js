@@ -15,13 +15,16 @@ const loginHandler = async (req, res) => {
     console.log("rows :", rows);
 
     if (rows.length === 0) {
-      return res.status(401).send({ message: "Wrong email or password !" });
+      return res.status(401).send({
+        message: "Account doesn't exist!",
+        isLogedIn: false,
+      });
     }
 
     const passwordMatch = await bcrypt.compare(password, rows[0].password);
 
     if (!passwordMatch) {
-      return res.status(500).send({
+      return res.status(401).send({
         message: "Password doesn't match!",
         isLogedIn: false,
       });
@@ -32,7 +35,7 @@ const loginHandler = async (req, res) => {
     console.log("token is : ", token);
 
     res.cookie("token", token, {
-      httpOnly: true,
+      httpOnly: true, // TODO: change this later.
       secure: false, // NOTE: flip this to true in production (HTTPS).
       sameSite: "lax",
       maxAge: 60 * 60 * 1000,

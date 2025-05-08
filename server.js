@@ -2,6 +2,8 @@ import express from "express";
 import { globalAuthMiddleware } from "./backend/middlewares.js";
 import signupHandler from "./backend/controllers/signup-handler.js";
 import loginHandler from "./backend/controllers/login-handler.js";
+import checkAuth from "./backend/controllers/auth/check-auth.js";
+import logout from "./backend/controllers/auth/logout.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 // cause we are using ES module type:
@@ -24,9 +26,9 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json()); // middlewere to parse incomming json.
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('js-projet'));
+app.use(express.static("js-projet"));
 
-// app.use(globalAuthMiddleware);
+app.use(globalAuthMiddleware);
 
 // serve static files (css, js)
 app.use(express.static(path.join(__dirname, "frontend")));
@@ -45,6 +47,10 @@ app.post("/api/login", loginHandler);
 
 // signup endpoint
 app.post("/api/signup", signupHandler);
+
+// auth
+app.get("/api/auth/check", checkAuth);
+app.post("/api/auth/logout", logout);
 
 // teacher routes:
 app.post("/api/exams", createNewExam);
