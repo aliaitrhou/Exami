@@ -7,6 +7,7 @@ import {
   getUser,
   getAllExams,
   createExam,
+  deleteExam,
 } from "./utils/client-actions.js";
 import { navigateTo } from "./utils/router.js";
 
@@ -248,23 +249,46 @@ const teacherDashboard = async () => {
   }
 
   examsList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
-  result.exams.map((exam) => {
-    examsList.innerHTML += `
-      <div class="rounded-lg border border-zinc-200 hover:border-zinc-300 dark:border-zinc-700 hover:dark:border-zinc-600 p-4 transition">
-        <h4 class="font-semibold text-lg mb-1">${exam.title}</h4>
-        <p class="text-sm text-zinc-500 mb-2 font-sora">${exam.description}</p>
-        <p class="text-xs text-zinc-400 mb-4">Target: ${exam.target_audience}</p>
-        <a id="edit-btn" href="#edit-exam/${exam.id}"
-          class="text-xs px-1 rounded bg-emerald-500 dark:bg-violet-500 border border-emerald-600 dark:border-violet-400 text-white"
-        >
-          Edit Exam →
-        </a>
-      </div>
-    `;
 
-    // document.addEventListener("click", () => {
-    //   window.location.hash = `edit-exam/${exam.id}`;
-    // });
+  result.exams.map((exam) => {
+    const uniqueDeleteBtnId = `delete-btn-${exam.id}`;
+
+    examsList.innerHTML += `
+    <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 shadow hover:shadow-md p-5 transition-all flex flex-col">
+      <div class="mb-3">
+        <h4 class="font-semibold text-lg mb-2 text-zinc-800 dark:text-zinc-100">${exam.title}</h4>
+        <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-2 font-sora">${exam.description}</p>
+        <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+          <span class="mr-1">Target:</span> ${exam.target_audience}
+        </div>
+      </div>
+      <div class="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-700 w-full flex flex-row justify-between items-center">
+        <a href="#edit-exam/${exam.id}"
+          class="inline-flex items-center text-xs text-emerald-600 dark:text-violet-400 hover:underline"
+        >
+          <i class="fa-solid fa-pen-to-square mr-1"></i>
+          Edit Exam
+        </a>
+        <button id="delete-btn-${exam.id}" class="inline-flex items-center text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors">
+          <i class="fa-solid fa-trash mr-1"></i>
+          Delete Exam
+        </button>
+      </div>
+    </div>
+  `;
+
+    setTimeout(() => {
+      const deleteBtn = document.getElementById(uniqueDeleteBtnId);
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", async () => {
+          const status = await deleteExam(exam.id);
+          renderAlert(status.message, status.alertType);
+          if (status.alertType === "success") {
+            window.location.reload();
+          }
+        });
+      }
+    }, 0);
   });
 };
 
@@ -338,7 +362,7 @@ function renderExamCreator() {
           </div>
           
           <div class="flex justify-start">
-            <button type="submit" class="rounded bg-emerald-500 dark:bg-violet-500 border border-emerald-600 dark:border-violet-400 text-white py-2 px-6 font-medium hover:bg-emerald-600 dark:hover:bg-violet-600">
+            <button id="create-exam-btn" type="submit" class="rounded bg-emerald-500 dark:bg-violet-500 border border-emerald-600 dark:border-violet-400 text-white py-1 px-3 font-medium hover:bg-emerald-600 dark:hover:bg-violet-600">
               Create Exam
             </button>
           </div>
@@ -615,16 +639,25 @@ function renderExamCreator() {
 
     // Validate the form
     if (!validateExamForm()) {
+      console.log("validation");
       return;
     }
 
     // Process form data to match the expected format
     const examData = processExamFormData();
 
+    const submitBtn = document.getElementById("create-exam-btn");
+
+    submitBtn.disabled;
+    submitBtn.textContent = "Creating...";
     const result = await createExam(examData);
+    submitBtn.textContent = "Create Exam";
+    submitBtn.enabled;
+    console.log("Result is (exam created) : ", result);
     renderAlert(result.message, result.alertType);
+
     if (result.alertType === "success") {
-      window.location.hash = "teacher-dashboard";
+      navigateTo("teacher-dashboard");
     }
   });
 
@@ -926,7 +959,6 @@ const studentDashboard = () => {
 // Home page
 function renderHomePage() {
   const user = getUser();
-  console.log("home page, user is : ", user);
 
   previewContainer.innerHTML = `
     <div class="flex flex-col items-center justify-center h-full">
@@ -957,15 +989,9 @@ function renderNotFoundPage() {
     <div class="flex flex-col items-center justify-center h-full font-sora">
       <h1 class="text-4xl font-bold mb-3">404</h1>
       <p class="text-xl text-gray-600 dark:text-gray-300 mb-8">Oops! - Page not found</p>
-      <a id="got-home-btn" href="${user.type === "student" ? "#student-dashboard" : "#teacher-dashboard"}" class="px-3 py-1 bg-emerald-500 dark:bg-violet-500 border-emerald-600 dark:border-violet-400   text-white rounded-lg hover:bg-emerald-600 dark:hover:bg-violet-600 transition-colors">Go Home</button>
+      <a id="got-home-btn" href="${user.type === "student" ? "#student-dashboard" : "#teacher-dashboard"}" class="px-3 py-1 bg-emerald-500 dark:bg-violet-500 border-emerald-600 dark:border-violet-400   text-white rounded-lg hover:bg-emerald-600 dark:hover:bg-violet-600 transition-colors">Go Home</a>
     </div>
   `;
-
-  // document.getElementById("got-home-btn").addEventListener("click", () => {
-  //   const path =
-  //     user.type === "student" ? "student-dashboard" : "teacher-dashboard";
-  //   window.location.hash = path;
-  // });
 }
 
 // Main function to render different previews

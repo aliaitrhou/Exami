@@ -155,38 +155,70 @@ export const getAllExams = async (teacherId) => {
   };
 };
 
-export const createExam = async (examData) => {
-  console.log("examData (createExam): ", examData);
+export const createExam = (examData) => {
+  return fetch("/api/exams", {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(examData),
+  })
+    .then((res) => {
+      return res.json().then((result) => {
+        console.log("result is :", result);
 
+        if (!res.ok) {
+          console.log("error creating exam");
+          return {
+            message: "Field to create exam!",
+            alertType: "error",
+          };
+        }
+
+        return {
+          message: "Exam created successfully!",
+          alertType: "success",
+        };
+      });
+    })
+    .catch((error) => {
+      console.error("Field to create exam, error :", error);
+      return {
+        message: "Field to create exam!",
+        alertType: "error",
+      };
+    });
+};
+
+export const deleteExam = async (examId) => {
   try {
-    const res = await fetch("/api/exams", {
-      method: "POST",
+    const response = await fetch(`/api/exams/${examId}`, {
+      method: "DELETE",
       headers: {
-        "Content-type": "application/json",
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(examData),
     });
 
-    const result = await res.json();
+    const result = await response.json();
 
     console.log("result is : ", result);
 
-    if (!res.ok) {
-      console.log("error creating exam");
+    if (!response.ok) {
+      console.log("error deleting exam");
       return {
-        message: "Field to create exam!",
+        message: "Field to delete exam!",
         alertType: "error",
       };
     }
 
     return {
-      message: "Exam created successfully!",
+      message: "Exam deleted successfully!",
       alertType: "success",
     };
   } catch (error) {
-    console.error("Field to create exam, error :", error);
+    console.error("Field to delete exam, error :", error);
     return {
-      message: "Field to create exam!",
+      message: "Field to delete exam!",
       alertType: "error",
     };
   }
