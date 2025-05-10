@@ -11,7 +11,7 @@ const signupHandler = async (req, res) => {
       email,
     ]);
 
-    if (rows.length > 0) {
+    if (rows.length != 0) {
       return res.status(409).send({
         message: "User already exists",
       });

@@ -1,8 +1,72 @@
+import db from "../../database/db.js";
+import { randomUUID } from "crypto";
+
+// to genrate unique link for exams:
+function generateUniqueLink() {
+  return `exam-${randomUUID()}`;
+}
+
 // for teacher routes:
-export const createNewExam = (req, res) => {
+//api/exams
+export const createNewExam = async (req, res) => {
+  const data = req.body;
+  console.log("exam data is : ", data);
   const user = req.user;
-  console.log(user);
-  // todo
+  console.log("user is :", user);
+  //TODO: use user data from req.
+
+  // if the id is zero
+  // update the teacher id
+  // using user object
+  let teacherId = data.teacher_id;
+  if (teacherId === 0) {
+    teacherId = user.userId;
+  }
+
+  console.log("create exam, (teacher id ):", teacherId);
+  // exams:
+  const examRes = await db.query(
+    `INSERT INTO exams (title, description, target_audience, teacher_id, access_link)
+    VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+    [
+      data.title,
+      data.description,
+      data.target_audience,
+      teacherId,
+      generateUniqueLink(),
+    ],
+  );
+  const examId = examRes.rows[0].id;
+
+  // questions:
+  for (const q of data.questions) {
+    const questionRes = await db.query(
+      `INSERT INTO questions (exam_id, type, statement, media_url, correct_answer, tolerance, duration, score)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+      [
+        examId,
+        q.type,
+        q.statement,
+        q.media_url,
+        q.type === "direct" ? q.correct_answer : null,
+        q.type === "direct" ? q.tolerance : null,
+        q.duration,
+        q.score,
+      ],
+    );
+    const questionId = questionRes.rows[0].id;
+
+    // qcm_options:
+    if (q.type === "qcm" && q.qcm_options) {
+      for (const opt of q.qcm_options) {
+        await db.query(
+          `INSERT INTO qcm_options (question_id, option_text, is_correct)
+          VALUES ($1, $2, $3)`,
+          [questionId, opt.option_text, opt.is_correct],
+        );
+      }
+    }
+  }
 };
 
 export const getExamDetails = (req, res) => {
@@ -21,6 +85,28 @@ export const deleteExam = (req, res) => {
   // todo
 };
 
-export const getExamsByTeacher = (req, res) => {
+//api/exams/teacher/:teacherId
+export const getExamsByTeacher = async (req, res) => {
+  const { teacherId } = req.params;
+  console.log("teacher id : ", teacherId);
+  // TODO: use real teacher id later.
+  try {
+    const { rows } = await db.query(
+      "SELECT * FROM exams WHERE teacher_id = $1",
+      [teacherId],
+    );
+
+    console.log("rows are : ", rows);
+
+    return res.status(200).json({
+      exams: rows,
+    });
+  } catch (e) {
+    console.error("Error : ", e);
+    return res.status(500).json({
+      message: e.message,
+    });
+  }
+
   // todo
 };
