@@ -3,6 +3,7 @@ import {
   getGithubProfiles,
   checkAuthStatus,
   logout,
+  getUser,
 } from "./utils/client-actions.js";
 
 // render alerts ui inside navbar.
@@ -71,11 +72,44 @@ export function updateNavbarForLoggedInUser(user) {
   });
 }
 
+export function navigationUI() {
+  const container = document.getElementById("navigation");
+  const user = getUser();
+  if (!user) {
+    return ;
+  };
+container.innerHTML =`
+               <div class="space-y-1">
+                    <a id="dashboard-btn" href="${user.type === 'student' ? '#student-dashboard' :  '#teacher-dashboard'}" class="w-full text-left px-4 py-2 rounded-md flex items-center bg-emerald-100 dark:bg-violet-900/30 text-emerald-600 dark:text-violet-300">
+                        <i class="fas fa-home mr-2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="#${user.type === 'student' ? 'student-exams' :  'teacher-exams'}" id="exams-btn" class="w-full text-left px-4 py-2 rounded-md flex items-center hover:bg-gray-100 dark:hover:bg-zinc-700">
+                        <i class="fas fa-book mr-2"></i>
+                        <span>Mes examens</span>
+                    </a>
+                    ${user.type === 'student' && (
+                      `
+                      <a href="#results" id="results-btn" class="w-full text-left px-4 py-2 rounded-md flex items-center hover:bg-gray-100 dark:hover:bg-zinc-700">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        <span>Résultats</span>
+                    </a>
+                      `
+                    )}
+                    
+                </div>
+`
+
+
+}
+
 function startExami() {
   changeTheme();
   getGithubProfiles();
   initRouter();
   checkAuthStatus();
+ 
+
 
   // check if hash exist in url "like #about"  if not path is "/home"
   // const path = window.location.hash.substring(1) || "/home";

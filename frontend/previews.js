@@ -832,10 +832,95 @@ const studentDashboard = () => {
   // TODO: (douae).
   // student dashboard goes here...
   previewContainer.innerHTML = `
-    <div class="w-full h-full border text-center">
-      <p>student dashboard</p>
-    </div>
+   <div id="dashboard-view" class=" p-6">
+                    <h1 class="text-2xl font-bold text-emerald-600 dark:text-violet-400 mb-6">Tableau de bord étudiant</h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
+                            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-link text-emerald-500 dark:text-violet-400 mr-2"></i>
+                                Accéder à un examen
+                            </h2>
+                            <p class="text-zinc-600 dark:text-zinc-300 mb-4">Entrez le lien d'invitation partagé par votre enseignant</p>
+                            <div class="flex">
+                                <input type="text" id="exam-link" placeholder="Coller le lien ici" 
+                                    class="flex-1 py-2 px-3 border border-gray-300 dark:border-zinc-600 rounded-l-md focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500 bg-white dark:bg-zinc-800">
+                                <button id="access-exam-btn" 
+                                    class="px-4 py-2 bg-emerald-500 dark:bg-violet-500 text-white rounded-r-md hover:bg-emerald-600 dark:hover:bg-violet-600">
+                                    Accéder
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
+                            <h2 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-chart-pie text-emerald-500 dark:text-violet-400 mr-2"></i>
+                                Statistiques
+                            </h2>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="text-zinc-600 dark:text-zinc-300">Examens complétés</span>
+                                    <span class="font-semibold">2</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-zinc-600 dark:text-zinc-300">Note moyenne</span>
+                                    <span class="font-semibold">72/100</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-zinc-600 dark:text-zinc-300">Dernière participation</span>
+                                    <span class="font-semibold">08/05/2025</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow mb-6">
+                        <h2 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-calendar-alt text-emerald-500 dark:text-violet-400 mr-2"></i>
+                            Examens récents
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-600">
+                                <thead>
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Titre</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Score</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-zinc-700 divide-y divide-gray-200 dark:divide-zinc-600">
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Programmation Web</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">08/05/2025</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">85/100</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                Complété
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">Base de données SQL</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">02/05/2025</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">67/100</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                Complété
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
   `;
+
+
+
+
+
 };
 
 // Home page
