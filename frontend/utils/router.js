@@ -24,17 +24,14 @@ const routes = {
   },
   "edit-exam": {
     access: "teacher",
-    requiresAuth: true,
     params: ["examId"],
   },
   "student-dashboard": {
     access: "student",
-    requiresAuth: true,
   },
   "take-exam": {
     access: "student",
-    requiresAuth: true,
-    params: ["examId"],
+    params: ["accessLink"],
   },
   "exam-results": {
     access: "both",

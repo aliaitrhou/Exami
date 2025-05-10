@@ -15,6 +15,7 @@ import {
   getExamDetails,
   getExamsByTeacher,
   updateExamInfo,
+  getExamInfo,
 } from "./backend/controllers/exams-handler.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,6 +61,7 @@ app.delete("/api/exams/:examId", deleteExam);
 app.get("/api/exams/teacher/:teacherId", getExamsByTeacher);
 
 //TODO: add student routes:
+app.get("/api/exams/access/:uniqueLink", getExamInfo);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

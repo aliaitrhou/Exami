@@ -8,8 +8,9 @@ import {
   getAllExams,
   createExam,
   deleteExam,
+  fetchExam,
 } from "./utils/client-actions.js";
-import { navigateTo } from "./utils/router.js";
+import { navigateTo, getParamFromUrl } from "./utils/router.js";
 
 const previewContainer = document.getElementById("dynamic-preview");
 
@@ -202,7 +203,11 @@ const showLoginForm = () => {
     renderAlert(status.alertMessage, status.alertType);
     if (status.loggedIn) {
       updateNavbarForLoggedInUser(status.userInfo);
-      navigateTo("home");
+      if (status.userInfo.type === "student") {
+        navigateTo("student-dashboard");
+      } else {
+        navigateTo("teacher-dashboard");
+      }
     }
   });
 };
@@ -256,10 +261,16 @@ const teacherDashboard = async () => {
     examsList.innerHTML += `
     <div class="bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600 shadow hover:shadow-md p-5 transition-all flex flex-col">
       <div class="mb-3">
-        <h4 class="font-semibold text-lg mb-2 text-zinc-800 dark:text-zinc-100">${exam.title}</h4>
+        <h4 class="font-semibold text-xl mb-2 text-zinc-800 dark:text-zinc-100">${exam.title}</h4>
         <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-2 font-sora">${exam.description}</p>
         <div class="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
           <span class="mr-1">Target:</span> ${exam.target_audience}
+        </div>
+        <div class="text-xs font-sora space-y-2">
+          <span>
+            Access link: (click to copy)
+          </span>
+          <button id="copy-access-link-${exam.id}" class="block">${exam.access_link}</button>
         </div>
       </div>
       <div class="mt-auto pt-3 border-t border-zinc-100 dark:border-zinc-700 w-full flex flex-row justify-between items-center">
@@ -279,6 +290,8 @@ const teacherDashboard = async () => {
 
     setTimeout(() => {
       const deleteBtn = document.getElementById(uniqueDeleteBtnId);
+      const copyBtn = document.getElementById(`copy-access-link-${exam.id}`);
+
       if (deleteBtn) {
         deleteBtn.addEventListener("click", async () => {
           const status = await deleteExam(exam.id);
@@ -286,6 +299,24 @@ const teacherDashboard = async () => {
           if (status.alertType === "success") {
             window.location.reload();
           }
+        });
+      }
+
+      if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+          renderAlert(status.message, status.alertType);
+          navigator.clipboard
+            .writeText(exam.access_link)
+            .then(() => {
+              renderAlert(
+                `Copied to clipboard: ${exam.access_link}`,
+                "success",
+              );
+            })
+            .catch((err) => {
+              console.error("Failed to copy: ", err);
+              renderAlert("Failed to copy!", "error");
+            });
         });
       }
     }, 0);
@@ -855,106 +886,684 @@ function renderExamCreator() {
 
 const renderQuestionManager = (examId) => {
   previewContainer.innerHTML = `
-<div>
-  edit exam...${examId}
-</div>
-`;
+    <div>
+      edit exam...${examId}
+    </div>
+  `;
 };
 
-const studentDashboard = () => {
-  // TODO: (douae).
-  // student dashboard goes here...
+function studentDashboard() {
+  const user = getUser(); // assumed to return your provided user object
   previewContainer.innerHTML = `
-   <div id="dashboard-view" class=" p-6">
-                    <h1 class="text-2xl font-bold text-emerald-600 dark:text-violet-400 mb-6">Tableau de bord étudiant</h1>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
-                            <h2 class="text-lg font-semibold mb-4 flex items-center">
-                                <i class="fas fa-link text-emerald-500 dark:text-violet-400 mr-2"></i>
-                                Accéder à un examen
-                            </h2>
-                            <p class="text-zinc-600 dark:text-zinc-300 mb-4">Entrez le lien d'invitation partagé par votre enseignant</p>
-                            <div class="flex">
-                                <input type="text" id="exam-link" placeholder="Coller le lien ici" 
-                                    class="flex-1 py-2 px-3 border border-gray-300 dark:border-zinc-600 rounded-l-md focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500 bg-white dark:bg-zinc-800">
-                                <button id="access-exam-btn" 
-                                    class="px-4 py-2 bg-emerald-500 dark:bg-violet-500 text-white rounded-r-md hover:bg-emerald-600 dark:hover:bg-violet-600">
-                                    Accéder
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
-                            <h2 class="text-lg font-semibold mb-4 flex items-center">
-                                <i class="fas fa-chart-pie text-emerald-500 dark:text-violet-400 mr-2"></i>
-                                Statistiques
-                            </h2>
-                            <div class="space-y-4">
-                                <div class="flex justify-between">
-                                    <span class="text-zinc-600 dark:text-zinc-300">Examens complétés</span>
-                                    <span class="font-semibold">2</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-zinc-600 dark:text-zinc-300">Note moyenne</span>
-                                    <span class="font-semibold">72/100</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-zinc-600 dark:text-zinc-300">Dernière participation</span>
-                                    <span class="font-semibold">08/05/2025</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow mb-6">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center">
-                            <i class="fas fa-calendar-alt text-emerald-500 dark:text-violet-400 mr-2"></i>
-                            Examens récents
-                        </h2>
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-zinc-600">
-                                <thead>
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Titre</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Date</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Score</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-zinc-700 divide-y divide-gray-200 dark:divide-zinc-600">
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">Programmation Web</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">08/05/2025</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">85/100</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                                                Complété
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">Base de données SQL</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">02/05/2025</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">67/100</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                                                Complété
-                                            </span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+    <div id="dashboard-view" class="p-6 space-y-6">
+      <h1 class="text-2xl font-bold text-emerald-600 dark:text-violet-400">Welcome back, ${user.firstname} 👋</h1>
+      
+      <!-- Profile Info -->
+      <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow space-y-2">
+        <h2 class="text-lg font-semibold text-emerald-600 dark:text-violet-400">Your Information</h2>
+        <p><strong>Full Name:</strong> ${user.firstname} ${user.lastname}</p>
+        <p><strong>Email:</strong> ${user.email}</p>
+        <p><strong>Birth Date:</strong> ${new Date(user.birth).toLocaleDateString()}</p>
+        <p><strong>Gender:</strong> ${user.gender}</p>
+        <p><strong>School:</strong> ${user.etablissement}</p>
+        <p><strong>Field:</strong> ${user.filiere.toUpperCase()}</p>
+      </div>
+
+      <!-- Exam Access -->
+      <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
+        <h2 class="text-lg font-semibold mb-4 flex items-center">
+          <i class="fas fa-link text-emerald-500 dark:text-violet-400 mr-2"></i>
+          Take an exam
+        </h2>
+        <p class="text-zinc-600 dark:text-zinc-300 mb-4">Enter the invitation link shared by your teacher:</p>
+        <form id="access-link-form" class="flex flex-col sm:flex-row">
+          <input name="accessLink" type="text" id="exam-link" placeholder="Paste exam link here..." 
+            required
+            class="flex-1 py-2 px-3 border border-gray-300 dark:border-zinc-600 rounded-l-md sm:rounded-none sm:rounded-l-md focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500 bg-white dark:bg-zinc-800 mb-2 sm:mb-0">
+          <button type="submit" id="access-exam-btn" 
+            class="px-4 py-2 bg-emerald-500 dark:bg-violet-500 text-white sm:rounded-none sm:rounded-r-md rounded-md hover:bg-emerald-600 dark:hover:bg-violet-600">
+            Access
+          </button>
+        </form>
+      </div>
+
+      <!-- Upcoming Exams (placeholder) -->
+      <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
+        <h2 class="text-lg font-semibold text-emerald-600 dark:text-violet-400 mb-2">Upcoming Exams</h2>
+        <p class="text-zinc-600 dark:text-zinc-300">No upcoming exams at the moment.</p>
+      </div>
+
+    </div>
   `;
 
+  // Add event listener to the access exam button
+  const form = document.getElementById("access-link-form");
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    const examPath = `take-exam?accessLink=${data.accessLink}`;
+    window.location.hash = examPath;
+  });
+}
 
+function renderExamTaker(accessLink) {
+  // Create a loading state while we fetch the exam
+  previewContainer.innerHTML = `
+    <div class="w-full h-full flex flex-col items-center justify-center p-6">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 dark:border-violet-500"></div>
+    </div>
+  `;
 
+  // Initialize the exam taking process
+  async function initExamTaking() {
+    try {
+      const result = await fetchExam(accessLink);
+      renderAlert(result.message, result.alertType);
+      if (result.alertType === "success") {
+        renderExamInterface(result.exam);
+      }
+    } catch (error) {
+      console.error("Failed to load exam:", error);
+      renderAlert("Failed to load exam. Please try again later.", "error");
+      previewContainer.innerHTML = `
+        <div class="w-full h-full p-6 flex items-center justify-center">
+          <button id="back-to-dashboard" class="mt-4 bg-emerald-500 dark:bg-violet-500 text-white py-2 px-4 rounded">
+            Back to Dashboard
+          </button>
+        </div>
+      `;
+      document
+        .getElementById("back-to-dashboard")
+        .addEventListener("click", () => {
+          window.location.hash = "student-dashboard";
+        });
+    }
+  }
 
+  // Render the exam interface with questions
+  function renderExamInterface(exam) {
+    // Initialize exam state
+    const examState = {
+      currentQuestionIndex: 0,
+      answers: Array(exam.questions.length).fill(null),
+      timers: {},
+      startTime: new Date(),
+      timeLimit: calculateTotalTimeLimit(exam.questions),
+    };
 
-};
+    // Function to calculate total time limit from all questions
+    function calculateTotalTimeLimit(questions) {
+      return questions.reduce((total, q) => total + q.duration, 0);
+    }
+
+    // Render the main exam container
+    previewContainer.innerHTML = `
+      <div class="p-6 flex flex-col h-full">
+        <!-- Exam header -->
+        <div class="mb-6 flex justify-between items-center">
+          <h2 class="text-2xl font-bold">${exam.title}</h2>
+          <div id="exam-timer" class="text-lg font-semibold bg-emerald-100 dark:bg-violet-900 text-emerald-800 dark:text-violet-200 px-4 py-2 rounded">
+            Time Remaining: Loading...
+          </div>
+        </div>
+        
+        <!-- Exam progress bar -->
+        <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2.5 mb-6">
+          <div id="progress-bar" class="bg-emerald-500 dark:bg-violet-500 h-2.5 rounded-full" style="width: 0%"></div>
+        </div>
+        
+        <!-- Question container -->
+        <div id="question-container" class="border-2 border-emerald-400  dark:border-zinc-600 bg-emerald-50 dark:bg-zinc-700 rounded-lg shadow-md p-6 mb-4 flex-grow">
+          <!-- Question content will be dynamically inserted here -->
+        </div>
+        
+        <!-- Question navigation -->
+        <div class="flex justify-between items-center mt-4">
+          <div class="flex items-center">
+            <button id="prev-question" class="bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 py-2 px-4 rounded-l disabled:opacity-50">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 py-2 px-4">
+              <span id="current-question">1</span> / <span id="total-questions">${exam.questions.length}</span>
+            </div>
+            <button id="next-question" class="bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 py-2 px-4 rounded-r disabled:opacity-50">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <span id="question-status" class="ml-3 text-sm text-zinc-500 dark:text-zinc-400">
+              <!-- Status indicator will appear here -->
+            </span>
+          </div>
+          <button id="finish-exam" class="bg-emerald-500 dark:bg-violet-500 text-white py-2 px-6 rounded hover:bg-emerald-600 dark:hover:bg-violet-600 transition">
+            Submit Exam
+          </button>
+        </div>
+        
+        <!-- Question list for quick navigation -->
+        <div class="mt-6">
+          <h3 class="text-sm font-semibold mb-2">Question Navigator:</h3>
+          <div id="question-navigator" class="flex flex-wrap gap-2">
+            <!-- Question buttons will be dynamically inserted here -->
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Populate question navigator
+    const questionNavigator = document.getElementById("question-navigator");
+    exam.questions.forEach((_, index) => {
+      const button = document.createElement("button");
+      button.className =
+        "w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 flex items-center justify-center text-sm";
+      button.textContent = index + 1;
+      button.addEventListener("click", () => {
+        navigateToQuestion(index);
+      });
+      questionNavigator.appendChild(button);
+    });
+
+    // Render initial question
+    renderQuestion(examState.currentQuestionIndex);
+
+    // Set up navigation buttons
+    document.getElementById("prev-question").addEventListener("click", () => {
+      if (examState.currentQuestionIndex > 0) {
+        navigateToQuestion(examState.currentQuestionIndex - 1);
+      }
+    });
+
+    document.getElementById("next-question").addEventListener("click", () => {
+      if (examState.currentQuestionIndex < exam.questions.length - 1) {
+        navigateToQuestion(examState.currentQuestionIndex + 1);
+      }
+    });
+
+    // Set up finish exam button
+    document.getElementById("finish-exam").addEventListener("click", () => {
+      confirmFinishExam();
+    });
+
+    // Start the overall exam timer
+    startExamTimer(examState.timeLimit);
+
+    // Function to navigate to a specific question
+    function navigateToQuestion(index) {
+      // Save current answer before navigating
+      saveCurrentAnswer();
+
+      // Update current question index
+      examState.currentQuestionIndex = index;
+
+      // Render the new question
+      renderQuestion(index);
+
+      // Update UI elements
+      updateNavigationButtons();
+      updateProgressBar();
+      updateQuestionNavigator();
+    }
+
+    // Function to save the current answer
+    function saveCurrentAnswer() {
+      const currentQuestion = exam.questions[examState.currentQuestionIndex];
+
+      if (currentQuestion.type === "qcm") {
+        const selectedOptions = [];
+        document
+          .querySelectorAll(".option-checkbox:checked")
+          .forEach((checkbox) => {
+            selectedOptions.push(parseInt(checkbox.value));
+          });
+        examState.answers[examState.currentQuestionIndex] =
+          selectedOptions.length > 0 ? selectedOptions : null;
+      } else if (currentQuestion.type === "direct") {
+        const answerInput = document.getElementById("direct-answer");
+        examState.answers[examState.currentQuestionIndex] =
+          answerInput.value.trim() !== "" ? answerInput.value : null;
+      }
+    }
+
+    // Function to render a specific question
+    function renderQuestion(index) {
+      const question = exam.questions[index];
+      const questionContainer = document.getElementById("question-container");
+
+      // Common question header
+      let questionHTML = `
+        <div class="mb-4">
+          <div class="flex justify-between mb-2">
+            <span class="font-semibold text-lg">Question ${index + 1}</span>
+            <span class="text-emerald-600 dark:text-violet-400">${question.score} points</span>
+          </div>
+          <p class="text-lg mb-4">${question.statement}</p>
+        `;
+
+      // Add media if available
+      if (question.media_url) {
+        questionHTML += `
+          <div class="mb-4">
+            <img src="${question.media_url}" alt="Question media" class="max-w-full rounded">
+          </div>
+        `;
+      }
+
+      questionHTML += `</div>`;
+
+      // Question type specific content
+      if (question.type === "qcm") {
+        questionHTML += `
+          <div class="space-y-3">
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Select all correct options:</p>
+        `;
+
+        // Add options for QCM question
+        question.qcm_options.forEach((option) => {
+          const isChecked =
+            examState.answers[index] &&
+            examState.answers[index].includes(option.id)
+              ? "checked"
+              : "";
+          questionHTML += `
+            <div class="flex items-center">
+              <input type="checkbox" id="option-${option.id}" class="option-checkbox mr-3 h-5 w-5 rounded border-zinc-300 dark:border-zinc-600" value="${option.id}" ${isChecked}>
+              <label for="option-${option.id}" class="text-lg">${option.option_text}</label>
+            </div>
+          `;
+        });
+
+        questionHTML += `</div>`;
+      } else if (question.type === "direct") {
+        const savedAnswer = examState.answers[index] || "";
+        questionHTML += `
+          <div>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-2">Enter your answer:</p>
+            <textarea id="direct-answer" class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-3 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500" rows="4">${savedAnswer}</textarea>
+          </div>
+        `;
+      }
+
+      // Question timer display
+      questionHTML += `
+        <div class="mt-4 flex justify-end">
+          <div id="question-timer" class="text-sm bg-zinc-100 dark:bg-zinc-700 px-3 py-1 rounded">
+            Time for this question: <span id="time-remaining">${question.duration}</span>s
+          </div>
+        </div>
+      `;
+
+      // Update the question container
+      questionContainer.innerHTML = questionHTML;
+
+      // Start question timer
+      startQuestionTimer(index, question.duration);
+
+      // Update navigation UI
+      document.getElementById("current-question").textContent = index + 1;
+      updateNavigationButtons();
+    }
+
+    // Function to update navigation buttons
+    function updateNavigationButtons() {
+      const prevButton = document.getElementById("prev-question");
+      const nextButton = document.getElementById("next-question");
+
+      prevButton.disabled = examState.currentQuestionIndex === 0;
+      nextButton.disabled =
+        examState.currentQuestionIndex === exam.questions.length - 1;
+
+      // Update question status indicator
+      updateQuestionStatus();
+    }
+
+    // Function to update the question status
+    function updateQuestionStatus() {
+      const statusElement = document.getElementById("question-status");
+      const answered =
+        examState.answers[examState.currentQuestionIndex] !== null;
+
+      if (answered) {
+        statusElement.innerHTML = `<span class="text-emerald-500 dark:text-emerald-400"><i class="fa-solid fa-check"></i> Answered</span>`;
+      } else {
+        statusElement.innerHTML = `<span class="text-orange-500"><i class="fa-solid fa-circle-exclamation"></i> Not answered</span>`;
+      }
+    }
+
+    // Function to update the progress bar
+    function updateProgressBar() {
+      const progressBar = document.getElementById("progress-bar");
+      const progress =
+        ((examState.currentQuestionIndex + 1) / exam.questions.length) * 100;
+      progressBar.style.width = `${progress}%`;
+    }
+
+    // Function to update the question navigator
+    function updateQuestionNavigator() {
+      const buttons = document.querySelectorAll("#question-navigator button");
+
+      buttons.forEach((button, index) => {
+        // Remove all classes first
+        button.classList.remove(
+          "bg-zinc-200",
+          "dark:bg-zinc-700",
+          "bg-emerald-500",
+          "dark:bg-violet-500",
+          "bg-orange-500",
+          "text-white",
+          "text-zinc-800",
+          "dark:text-zinc-200",
+        );
+
+        if (index === examState.currentQuestionIndex) {
+          // Current question
+          button.classList.add(
+            "bg-emerald-500",
+            "dark:bg-violet-500",
+            "text-white",
+          );
+        } else if (examState.answers[index] !== null) {
+          // Answered question
+          button.classList.add(
+            "bg-emerald-200",
+            "dark:bg-violet-700",
+            "text-emerald-800",
+            "dark:text-violet-200",
+          );
+        } else {
+          // Unanswered question
+          button.classList.add(
+            "bg-zinc-200",
+            "dark:bg-zinc-700",
+            "text-zinc-800",
+            "dark:text-zinc-200",
+          );
+        }
+      });
+    }
+
+    // Function to start the overall exam timer
+    function startExamTimer(timeLimit) {
+      const timerElement = document.getElementById("exam-timer");
+      let timeRemaining = timeLimit;
+
+      function formatTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        return `${hours > 0 ? hours + "h " : ""}${minutes}m ${secs}s`;
+      }
+
+      const examInterval = setInterval(() => {
+        timeRemaining--;
+
+        timerElement.innerHTML = `Time Remaining: ${formatTime(timeRemaining)}`;
+
+        if (timeRemaining <= 300) {
+          // 5 minutes warning
+          timerElement.classList.remove(
+            "bg-emerald-100",
+            "dark:bg-violet-900",
+            "text-emerald-800",
+            "dark:text-violet-200",
+          );
+          timerElement.classList.add(
+            "bg-orange-100",
+            "dark:bg-orange-900",
+            "text-orange-800",
+            "dark:text-orange-200",
+          );
+        }
+
+        if (timeRemaining <= 60) {
+          // 1 minute warning
+          timerElement.classList.remove(
+            "bg-orange-100",
+            "dark:bg-orange-900",
+            "text-orange-800",
+            "dark:text-orange-200",
+          );
+          timerElement.classList.add(
+            "bg-red-100",
+            "dark:bg-red-900",
+            "text-red-800",
+            "dark:text-red-200",
+          );
+        }
+
+        if (timeRemaining <= 0) {
+          clearInterval(examInterval);
+          finishExam(true);
+        }
+      }, 1000);
+
+      // Store the interval ID for cleanup
+      examState.examTimerInterval = examInterval;
+    }
+
+    // Function to start individual question timer
+    function startQuestionTimer(questionIndex, duration) {
+      // Clear any existing timer for this question
+      if (examState.timers[questionIndex]) {
+        clearInterval(examState.timers[questionIndex]);
+      }
+
+      const timeRemainingElement = document.getElementById("time-remaining");
+      let timeRemaining = duration;
+
+      // Set initial time
+      timeRemainingElement.textContent = timeRemaining;
+
+      const questionInterval = setInterval(() => {
+        timeRemaining--;
+
+        timeRemainingElement.textContent = timeRemaining;
+
+        // Warning colors
+        if (timeRemaining <= Math.min(10, Math.floor(duration / 4))) {
+          timeRemainingElement.classList.add("text-orange-500", "font-bold");
+        }
+
+        if (timeRemaining <= Math.min(5, Math.floor(duration / 8))) {
+          timeRemainingElement.classList.remove("text-orange-500");
+          timeRemainingElement.classList.add("text-red-500", "animate-pulse");
+        }
+
+        if (timeRemaining <= 0) {
+          clearInterval(questionInterval);
+
+          // Auto-move to next question if not the last one
+          if (questionIndex < exam.questions.length - 1) {
+            navigateToQuestion(questionIndex + 1);
+          }
+        }
+      }, 1000);
+
+      // Store the interval ID
+      examState.timers[questionIndex] = questionInterval;
+    }
+
+    // Function to confirm before finishing exam
+    function confirmFinishExam() {
+      // Count unanswered questions
+      const unansweredCount = examState.answers.filter(
+        (answer) => answer === null,
+      ).length;
+
+      // Create modal for confirmation
+      const modalHTML = `
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 max-w-md w-full">
+            <h3 class="text-xl font-bold mb-4">Finish Exam?</h3>
+            ${
+              unansweredCount > 0
+                ? `<p class="text-orange-500 mb-4"><i class="fa-solid fa-triangle-exclamation"></i> You have ${unansweredCount} unanswered question${unansweredCount > 1 ? "s" : ""}.</p>`
+                : `<p class="text-emerald-500 dark:text-emerald-400 mb-4"><i class="fa-solid fa-check-circle"></i> All questions have been answered.</p>`
+            }
+            <p class="mb-6">Are you sure you want to submit your exam?</p>
+            <div class="flex justify-end space-x-3">
+              <button id="cancel-finish" class="bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 py-2 px-4 rounded">
+                Cancel
+              </button>
+              <button id="confirm-finish" class="bg-emerald-500 dark:bg-violet-500 text-white py-2 px-4 rounded">
+                Submit Exam
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Create temporary element to hold the modal
+      const modalContainer = document.createElement("div");
+      modalContainer.innerHTML = modalHTML;
+      document.body.appendChild(modalContainer);
+
+      // Add event listeners to buttons
+      document.getElementById("cancel-finish").addEventListener("click", () => {
+        document.body.removeChild(modalContainer);
+      });
+
+      document
+        .getElementById("confirm-finish")
+        .addEventListener("click", () => {
+          document.body.removeChild(modalContainer);
+          finishExam(false);
+        });
+    }
+
+    // Function to finish the exam and submit answers
+    function finishExam(isTimeout) {
+      // Save the current answer before submitting
+      saveCurrentAnswer();
+
+      // Clear all timers
+      Object.values(examState.timers).forEach((timerId) => {
+        clearInterval(timerId);
+      });
+
+      if (examState.examTimerInterval) {
+        clearInterval(examState.examTimerInterval);
+      }
+
+      // Calculate time taken
+      const endTime = new Date();
+      const timeTaken = Math.floor((endTime - examState.startTime) / 1000); // in seconds
+
+      // Prepare submission data
+      const submissionData = {
+        exam_id: exam.id,
+        answers: [],
+        time_taken: timeTaken,
+        is_timeout: isTimeout,
+      };
+
+      // Format answers for submission
+      exam.questions.forEach((question, index) => {
+        const answer = examState.answers[index];
+
+        if (question.type === "qcm") {
+          submissionData.answers.push({
+            question_id: question.id,
+            selected_options: answer || [],
+          });
+        } else if (question.type === "direct") {
+          submissionData.answers.push({
+            question_id: question.id,
+            text_answer: answer || "",
+          });
+        }
+      });
+
+      console.log("Submitting exam data:", submissionData);
+
+      // Here you would normally call an API to submit the exam
+      // For now, just show a success message
+      showExamCompletionScreen(submissionData, isTimeout);
+    }
+
+    // Function to show exam completion screen
+    function showExamCompletionScreen(submissionData, isTimeout) {
+      // Calculate some statistics
+      const answeredCount = submissionData.answers.filter((a) => {
+        if (Array.isArray(a.selected_options))
+          return a.selected_options.length > 0;
+        if (a.text_answer) return a.text_answer.trim() !== "";
+        return false;
+      }).length;
+
+      const completionPercentage = Math.round(
+        (answeredCount / exam.questions.length) * 100,
+      );
+
+      // Format time taken
+      function formatTimeTaken(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = seconds % 60;
+
+        let result = "";
+        if (hours > 0) result += `${hours} hour${hours > 1 ? "s" : ""} `;
+        if (minutes > 0)
+          result += `${minutes} minute${minutes > 1 ? "s" : ""} `;
+        if (secs > 0 || (hours === 0 && minutes === 0))
+          result += `${secs} second${secs !== 1 ? "s" : ""}`;
+
+        return result.trim();
+      }
+
+      previewContainer.innerHTML = `
+        <div class="h-full p-6 flex flex-col items-center justify-center">
+          <div class="w-full max-w-md bg-white dark:bg-zinc-800 rounded-lg border border-emerald-200 dark:border-zinc-600  p-6 text-center">
+            ${
+              isTimeout
+                ? `<div class="text-red-500 text-5xl mb-4"><i class="fa-solid fa-hourglass-end"></i></div>
+              <h2 class="text-2xl font-bold mb-2">Time's Up!</h2>
+              <p class="mb-6">Your exam has been automatically submitted.</p>`
+                : `<div class="text-emerald-500 dark:text-emerald-400 text-5xl mb-4"><i class="fa-solid fa-check-circle"></i></div>
+              <h2 class="text-2xl font-bold mb-2">Exam Submitted!</h2>
+              <p class="mb-6">Your answers have been recorded successfully.</p>`
+            }
+            
+            <div class="flex justify-between mb-4 px-4 py-3 bg-zinc-100 dark:bg-zinc-700 rounded">
+              <span>Questions Answered:</span>
+              <span class="font-semibold">${answeredCount} / ${exam.questions.length} (${completionPercentage}%)</span>
+            </div>
+            
+            <div class="flex justify-between mb-6 px-4 py-3 bg-zinc-100 dark:bg-zinc-700 rounded">
+              <span>Time Taken:</span>
+              <span class="font-semibold">${formatTimeTaken(submissionData.time_taken)}</span>
+            </div>
+            
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
+              Your instructor will grade your exam and provide feedback.
+            </p>
+            
+            <button id="return-to-dashboard" class="w-full bg-emerald-500 dark:bg-violet-500 text-white py-3 px-6 rounded hover:bg-emerald-600 dark:hover:bg-violet-600 transition">
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      `;
+
+      // Add event listener to return button
+      document
+        .getElementById("return-to-dashboard")
+        .addEventListener("click", () => {
+          window.location.hash = "student-dashboard";
+        });
+    }
+  }
+
+  // Start the exam taking process
+  initExamTaking();
+}
+
+function renderExamResults(examId) {
+  previewContainer.innerHTML = `
+    <div>
+      my exms result
+    </div>
+  `;
+}
 
 // Home page
 function renderHomePage() {
@@ -1018,25 +1627,25 @@ export async function renderPreview(previewName) {
         teacherDashboard();
         break;
       case "create-exam":
-        // todo
         renderExamCreator();
         break;
       case "edit-exam": {
-        // todo
+        // TODO:
+        const examId = getParamFromUrl("examId");
         renderQuestionManager(examId);
         break;
       }
       case "student-dashboard":
-        // todo
         studentDashboard();
         break;
       case "take-exam": {
-        // todo
-        renderExamTaker(examId);
+        //TODO:
+        const accessLink = getParamFromUrl("accessLink");
+        renderExamTaker(accessLink);
         break;
       }
       case "exam-results": {
-        // todo
+        //TODO:
         const examId = getParamFromUrl("examId");
         await renderExamResults(examId);
         break;
@@ -1045,7 +1654,8 @@ export async function renderPreview(previewName) {
         renderNotFoundPage();
         break;
       default:
-        renderHomePage();
+        renderNotFoundPage();
+      // renderHomePage();
     }
   } catch (error) {
     console.error("Error rendering preview:", error);

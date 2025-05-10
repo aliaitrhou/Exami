@@ -7,7 +7,6 @@ function generateUniqueLink() {
 }
 
 // for teacher routes:
-//api/exams
 export const createNewExam = async (req, res) => {
   const data = req.body;
   const user = req.user;
@@ -132,4 +131,71 @@ export const getExamsByTeacher = async (req, res) => {
   }
 
   // todo
+};
+
+// student routes:
+//"/api/exams/access/:uniqueLink", getExamInfo);
+export const getExamInfo = async (req, res) => {
+  const { uniqueLink } = req.params;
+  console.log("unique link is :", uniqueLink);
+
+  try {
+    // 1️⃣ Get exam details
+    const examRes = await db.query(
+      `SELECT id, title, description, target_audience FROM exams WHERE access_link = $1`,
+      [uniqueLink],
+    );
+
+    if (examRes.rowCount === 0) {
+      return res.status(404).json({ message: "Exam not found" });
+    }
+
+    const exam = examRes.rows[0];
+
+    // 2️⃣ Get questions
+    const questionsRes = await db.query(
+      `SELECT * FROM questions WHERE exam_id = $1`,
+      [exam.id],
+    );
+
+    const questions = [];
+
+    for (const q of questionsRes.rows) {
+      let qcm_options = [];
+
+      // 3️⃣ If QCM, get options
+      if (q.type === "qcm") {
+        const optionsRes = await db.query(
+          `SELECT id, option_text, is_correct FROM qcm_options WHERE question_id = $1`,
+          [q.id],
+        );
+        qcm_options = optionsRes.rows;
+      }
+
+      questions.push({
+        id: q.id,
+        type: q.type,
+        statement: q.statement,
+        media_url: q.media_url,
+        correct_answer: q.correct_answer,
+        tolerance: q.tolerance,
+        duration: q.duration,
+        score: q.score,
+        qcm_options,
+      });
+    }
+
+    return res.status(200).json({
+      id: exam.id,
+      title: exam.title,
+      description: exam.description,
+      target_audience: exam.target_audience,
+      questions,
+    });
+  } catch (err) {
+    console.error("Error:", err);
+    return res.status(500).json({
+      message: "Failed to fetch exam",
+    });
+  }
 };
