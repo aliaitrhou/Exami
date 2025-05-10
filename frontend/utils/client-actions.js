@@ -1,4 +1,4 @@
-import { updateNavbarForLoggedInUser, renderAlert } from "../main.js";
+import { updateNavbarForLoggedInUser, renderAlert, navigationUI } from "../main.js";
 import { navigateTo } from "./router.js";
 
 // signup endpoint
@@ -119,6 +119,7 @@ export function checkAuthStatus() {
     .then((data) => {
       if (data.isLoggedIn) {
         const user = getUser();
+        navigationUI();
         updateNavbarForLoggedInUser(user);
         if (user.type === "student") {
           navigateTo("student-dashboard");
