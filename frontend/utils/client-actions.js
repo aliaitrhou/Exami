@@ -90,6 +90,7 @@ export function getUserType() {
   return localStorage.getItem("userType") || "guest";
 }
 
+// if user is logged in only
 export function getUser() {
   const userJson = localStorage.getItem("user");
   return userJson ? JSON.parse(userJson) : null;
@@ -133,4 +134,59 @@ export function checkAuthStatus() {
 
 export const getGithubProfiles = () => {
   console.log("git out github profiles...");
+};
+
+// teacher dashboard actions
+export const getAllExams = async (teacherId) => {
+  const res = await fetch(`/api/exams/teacher/${teacherId}`);
+  const result = await res.json();
+
+  if (!res.ok) {
+    return {
+      message: "Field to get exams!",
+      alertType: "error",
+    };
+  }
+
+  return {
+    exams: result.exams,
+    alertType: "success",
+  };
+};
+
+export const createExam = async (examData) => {
+  console.log("examData (createExam): ", examData);
+
+  try {
+    const res = await fetch("/api/exams", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(examData),
+    });
+
+    const result = await res.json();
+
+    console.log("result is : ", result);
+
+    if (!res.ok) {
+      console.log("error creating exam");
+      return {
+        message: "Field to create exam!",
+        alertType: "error",
+      };
+    }
+
+    return {
+      message: "Exam created successfully!",
+      alertType: "success",
+    };
+  } catch (error) {
+    console.error("Field to create exam, error :", error);
+    return {
+      message: "Field to create exam!",
+      alertType: "error",
+    };
+  }
 };

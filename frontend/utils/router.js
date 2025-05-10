@@ -45,11 +45,33 @@ const routes = {
 
 // Initialize router with hash-based navigation
 export function initRouter() {
+  // Handle hash changes
   window.addEventListener("hashchange", () => {
     const path = window.location.hash.substring(1).split("?")[0] || "home";
     navigateTo(path);
   });
+
+  // Handle initial load
+  const initialPath = window.location.hash.substring(1).split("?")[0] || "home";
+  navigateTo(initialPath);
+
+  // Handle manual clicks on <a> links to re-trigger navigateTo even if hash stays the same
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a[href^='#']");
+    if (link) {
+      e.preventDefault();
+      const targetPath = link.getAttribute("href").substring(1).split("?")[0];
+      navigateTo(targetPath);
+    }
+  });
 }
+// export function initRouter() {
+//   window.addEventListener("hashchange", () => {
+//     const path = window.location.hash.substring(1).split("?")[0] || "home";
+//     console.log("hash change");
+//     navigateTo(path);
+//   });
+// }
 
 // Navigate to a specific route
 export function navigateTo(path, params = {}) {

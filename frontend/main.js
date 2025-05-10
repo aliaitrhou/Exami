@@ -1,4 +1,4 @@
-import { initRouter, navigateTo } from "./utils/router.js";
+import { initRouter } from "./utils/router.js";
 import {
   getGithubProfiles,
   checkAuthStatus,
@@ -57,9 +57,12 @@ export function updateNavbarForLoggedInUser(user) {
    <span class="mr-4">${user.firstname} ${user.lastname}</span>
     <button
       id="logout-btn"
-      class="px-3 py-1 rounded-md bg-emerald-500 text-white border border-emerald-600 dark:border-violet-400 dark:bg-violet-500 hover:bg-emerald-600 dark:hover:bg-violet-600"
+      class="px-3 py-1 rounded-md bg-emerald-500 text-white border border-emerald-600 dark:border-violet-400 dark:bg-violet-500 hover:bg-emerald-600 dark:hover:bg-violet-600 "
     >
-      Logout
+      <i class="fa-solid fa-right-from-bracket"></i>
+      <span>
+        Logout
+      </span>
     </button>
   `;
 
@@ -71,12 +74,13 @@ export function updateNavbarForLoggedInUser(user) {
 function startExami() {
   changeTheme();
   getGithubProfiles();
-  checkAuthStatus();
   initRouter();
+  checkAuthStatus();
 
   // check if hash exist in url "like #about"  if not path is "/home"
-  const path = window.location.hash.substring(1) || "/home";
-  navigateTo(path);
+  // const path = window.location.hash.substring(1) || "/home";
+  // console.log("path is : ", path);
+  // navigateTo("home");
 }
 
 document.addEventListener("DOMContentLoaded", startExami);
