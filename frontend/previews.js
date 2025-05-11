@@ -1,4 +1,8 @@
-import { renderAlert, updateNavbarForLoggedInUser } from "./main.js";
+import {
+  renderAlert,
+  updateNavbarForLoggedInUser,
+  navigationUI,
+} from "./main.js";
 import {
   login,
   signup,
@@ -9,6 +13,8 @@ import {
   createExam,
   deleteExam,
   fetchExam,
+  startExamSession,
+  submitExam,
 } from "./utils/client-actions.js";
 import { navigateTo, getParamFromUrl } from "./utils/router.js";
 
@@ -43,45 +49,59 @@ const showSignupForm = () => {
         <div class="flex flex-col sm:flex-row gap-3 lg:gap-4">
           <div class="w-1/2 space-y-1">
             <label for="firstname" class="inline">First Name</label>
-            <input class="w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md" type="text" id="firstname" name="firstname" required>
+            <input
+              class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+              type="text" id="firstname" name="firstname" required>
           </div>
           <div class="w-1/2 space-y-1">
             <label for="lastname">Last Name</label>
             <input
-              class="w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-slate-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
+              class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
               type="text" id="lastname" name="lastname" required>
           </div>
         </div>
         <label for="email">Email</label>
         <input
-          class="px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
+          class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
           type="email" id="email" name="email" placeholder="eg. example@gmail.com" required>
-        <label for="password">Password</label>
-        <input
-          class="px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
-          type="password" id="password" name="password" required>
+        <div class="flex flex-col sm:flex-row gap-3 lg:gap-4">
+          <div class="w-1/2 space-y-1">
+            <label for="password">Password</label>
+            <input
+              class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+              type="password" id="password" name="password" required>
+          </div>
+          <div class="w-1/2 space-y-1">
+            <label for="confPassword">Confirm Password</label>
+            <input
+              class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+              type="password" id="confPassword" name="confPassword" required>
+          </div>
+        </div>
         <label for="birth">Date of birth</label>
         <input
-          class="px-3 py-2 text-zinc-500 dark:text-zinc-500 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
+          class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
           type="date" id="birth" name="birth" required>
         <label for="gender">Gender</label>
         <select
           required
           id="gender"
           name="gender"
-          class="px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md">
+          class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
           <option value="" selected>Gender</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
-        <div class="mb-3 flex flex-col sm:flex-row gap-3 lg:gap-4">
+        <div 
+        class="flex flex-col sm:flex-row gap-3 lg:gap-4"
+        >
           <div class="w-1/2 space-y-1">
             <label  for="etablissement">Établissement</label>
             <select
               required
               id="etablissement"
               name="etablissement"
-              class="block w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
+              class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
               <option value="">Your Etablissement</option>
               <option value="fs">FS</option>
               <option value="ensa">ENSA</option>
@@ -95,7 +115,7 @@ const showSignupForm = () => {
               <label id="type" for="type" >User Type</label>
               <select
                   required
-                  class="block w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-slate-300 bg-slate-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md"
+                  class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
                   id="type" name="type" required>
                 <option value="student">Student</option>
                 <option value="teacher">Teacher</option>
@@ -105,7 +125,7 @@ const showSignupForm = () => {
         <button
           id="signup-button"
           type="submit"
-          class="flex justify-center items-center gap-2 w-full rounded-full border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white py-2 focus:outline-none mt-2 md:mt-4 xl:mt-6"
+          class="flex justify-center items-center gap-2 w-full rounded border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white py-2 focus:outline-none mt-2 md:mt-4 xl:mt-6"
         >
           Sign Up
         </button>
@@ -125,6 +145,10 @@ const showSignupForm = () => {
 
     console.log("for data is : ", data);
 
+    if (data.password !== data.confPassword) {
+      renderAlert("Passwords doesn't match", "error");
+      return;
+    }
     formButtonElement.innerHTML = `
         <div class="w-full flex flex-row items-center justify-center gap-2">
           <i class="fa-solid fa-circle-notch animate-spin"></i>
@@ -149,18 +173,24 @@ const showLoginForm = () => {
   previewContainer.innerHTML = `
     <div class="w-full sm:w-[450px] md:w-[550px] xl:w-[550px] mx-auto h-full flex items-center justify-center">
       <form id="login-form" class="w-full p-4 sm:p-6 lg:p-8 inline space-y-3 md:space-y-4 text-black dark:text-zinc-300 rounded-sm border border-gray-300/50 dark:border-zinc-700/50 bg-white dark:bg-zinc-800">
-      <h3 class="w-full text-center text-4xl">Log in</h3>
+        <h3 class="w-full text-center text-4xl">Log in</h3>
         <div class="space-y-2">
           <label for="email" class="inline">Email</label>
-          <input class="w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md" type="text" id="email" name="email" required>
+          <input
+            class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+            type="text" id="email" name="email" required>
         </div>
         <div class="space-y-2">
           <label for="password" class="">Password</label>
-          <input class="w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md" type="password" id="password" name="password" required>
+          <input 
+            class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+            type="password" id="password" name="password" required>
         </div>
         <div class="space-y-2">
           <label for="type" class="">User Type</label>
-          <select class="w-full px-3 py-2 text-zinc-600 dark:text-zinc-300 border border-gray-300 bg-gray-200 dark:border-zinc-600 dark:bg-zinc-800 rounded-md" id="type" name="type" required>
+          <select 
+            class="w-full rounded border border-zinc-300 dark:border-zinc-600 p-2 bg-zinc-100 dark:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-violet-500"
+            id="type" name="type" required>
             <option value="" selected>choose your role</option>
             <option value="student">Student</option>
             <option value="teacher">Teacher</option>
@@ -169,7 +199,7 @@ const showLoginForm = () => {
         <button
           id="login-button"
           type="submit"
-          class="flex justify-center items-center gap-2 w-full rounded-full border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white py-2 focus:outline-none mt-2 md:mt-4 xl:mt-6"
+          class="flex justify-center items-center gap-2 w-full rounded border border-emerald-600  bg-emerald-500 dark:border-violet-400 dark:bg-violet-500 text-white py-2 focus:outline-none"
         >
           Log in
         </button>
@@ -203,6 +233,7 @@ const showLoginForm = () => {
     renderAlert(status.alertMessage, status.alertType);
     if (status.loggedIn) {
       updateNavbarForLoggedInUser(status.userInfo);
+      navigationUI();
       if (status.userInfo.type === "student") {
         navigateTo("student-dashboard");
       } else {
@@ -216,13 +247,13 @@ const teacherDashboard = async () => {
   const user = getUser();
 
   previewContainer.innerHTML = `
-    <div class="w-full h-full p-6 space-y-6">
+    <div class="w-full h-full p-6 space-y-4">
       <div class="flex justify-between items-start">
         <div>
           <h3 class="font-semibold text-3xl mb-1">Welcome back,</h3>
           <h4 class="text-xl text-emerald-500 dark:text-violet-400">Professor ${user.lastname}!</h4>
         </div>
-        <a href="#create-exam" class="flex items-center gap-2 rounded-md bg-emerald-500 dark:bg-violet-500 text-white px-2 py-1 text-sm shadow hover:bg-emerald-600 dark:hover:bg-violet-600">
+        <a href="#create-exam" class="flex items-center gap-2 rounded-md bg-emerald-500 dark:bg-violet-500 border border-emerald-600 dark:border-violet-400 text-white px-2 py-1 text-sm shadow hover:bg-emerald-600 dark:hover:bg-violet-600">
           <i class="fa-solid fa-plus"></i>
           <span>Create Exam</span>
         </a>
@@ -253,7 +284,8 @@ const teacherDashboard = async () => {
     return renderAlert(result.message, result.alertType);
   }
 
-  examsList.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+  examsList.className =
+    "max-h-[65dvh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
 
   result.exams.map((exam) => {
     const uniqueDeleteBtnId = `delete-btn-${exam.id}`;
@@ -896,7 +928,7 @@ function studentDashboard() {
   const user = getUser(); // assumed to return your provided user object
   previewContainer.innerHTML = `
     <div id="dashboard-view" class="p-6 space-y-6">
-      <h1 class="text-2xl font-bold text-emerald-600 dark:text-violet-400">Welcome back, ${user.firstname} 👋</h1>
+      <h1 class="text-2xl font-sora font-bold text-emerald-600 dark:text-violet-400">Welcome back, ${user.firstname} 👋</h1>
       
       <!-- Profile Info -->
       <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow space-y-2">
@@ -905,8 +937,7 @@ function studentDashboard() {
         <p><strong>Email:</strong> ${user.email}</p>
         <p><strong>Birth Date:</strong> ${new Date(user.birth).toLocaleDateString()}</p>
         <p><strong>Gender:</strong> ${user.gender}</p>
-        <p><strong>School:</strong> ${user.etablissement}</p>
-        <p><strong>Field:</strong> ${user.filiere.toUpperCase()}</p>
+        <p><strong>University:</strong> ${user.etablissement}</p>
       </div>
 
       <!-- Exam Access -->
@@ -926,13 +957,6 @@ function studentDashboard() {
           </button>
         </form>
       </div>
-
-      <!-- Upcoming Exams (placeholder) -->
-      <div class="bg-white dark:bg-zinc-700 p-6 rounded-lg shadow">
-        <h2 class="text-lg font-semibold text-emerald-600 dark:text-violet-400 mb-2">Upcoming Exams</h2>
-        <p class="text-zinc-600 dark:text-zinc-300">No upcoming exams at the moment.</p>
-      </div>
-
     </div>
   `;
 
@@ -940,14 +964,19 @@ function studentDashboard() {
   const form = document.getElementById("access-link-form");
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
-    const examPath = `take-exam?accessLink=${data.accessLink}`;
+
+    // TODO:
+    const result = startExamSession(data.accessLink);
+    console.log("results:", result);
+    const examPath = `take-exam?accessLink=${data.accessLink.trim()}`;
     window.location.hash = examPath;
   });
 }
 
-function renderExamTaker(accessLink) {
+const renderExamTaker = async (accessLink) => {
   // Create a loading state while we fetch the exam
   previewContainer.innerHTML = `
     <div class="w-full h-full flex flex-col items-center justify-center p-6">
@@ -959,6 +988,7 @@ function renderExamTaker(accessLink) {
   async function initExamTaking() {
     try {
       const result = await fetchExam(accessLink);
+      console.log("exam taker, result is : ", result);
       renderAlert(result.message, result.alertType);
       if (result.alertType === "success") {
         renderExamInterface(result.exam);
@@ -1392,7 +1422,7 @@ function renderExamTaker(accessLink) {
       // Create modal for confirmation
       const modalHTML = `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 max-w-md w-full">
+          <div class="bg-white dark:bg-zinc-600 rounded-lg p-6 max-w-md w-full dark:text-white border border-zinc-300 dark:border-zinc-500">
             <h3 class="text-xl font-bold mb-4">Finish Exam?</h3>
             ${
               unansweredCount > 0
@@ -1473,7 +1503,9 @@ function renderExamTaker(accessLink) {
         }
       });
 
-      console.log("Submitting exam data:", submissionData);
+      // TODO: save data to db:
+      const result = submitExam(submissionData);
+      console.log("submtting result : ", result);
 
       // Here you would normally call an API to submit the exam
       // For now, just show a success message
@@ -1555,12 +1587,12 @@ function renderExamTaker(accessLink) {
 
   // Start the exam taking process
   initExamTaking();
-}
+};
 
 function renderExamResults(examId) {
   previewContainer.innerHTML = `
-    <div>
-      my exms result
+    <div class="p-4">
+      No exams yet...
     </div>
   `;
 }
@@ -1646,8 +1678,7 @@ export async function renderPreview(previewName) {
       }
       case "exam-results": {
         //TODO:
-        const examId = getParamFromUrl("examId");
-        await renderExamResults(examId);
+        await renderExamResults();
         break;
       }
       case "not-found":
