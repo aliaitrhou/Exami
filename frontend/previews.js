@@ -1,4 +1,8 @@
-import { renderAlert, updateNavbarForLoggedInUser } from "./main.js";
+import {
+  renderAlert,
+  updateNavbarForLoggedInUser,
+  navigationUI,
+} from "./main.js";
 import {
   login,
   signup,
@@ -9,6 +13,8 @@ import {
   createExam,
   deleteExam,
   fetchExam,
+  startExamSession,
+  submitExam,
 } from "./utils/client-actions.js";
 import { navigateTo, getParamFromUrl } from "./utils/router.js";
 
@@ -227,6 +233,7 @@ const showLoginForm = () => {
     renderAlert(status.alertMessage, status.alertType);
     if (status.loggedIn) {
       updateNavbarForLoggedInUser(status.userInfo);
+      navigationUI();
       if (status.userInfo.type === "student") {
         navigateTo("student-dashboard");
       } else {
@@ -930,7 +937,7 @@ function studentDashboard() {
         <p><strong>Email:</strong> ${user.email}</p>
         <p><strong>Birth Date:</strong> ${new Date(user.birth).toLocaleDateString()}</p>
         <p><strong>Gender:</strong> ${user.gender}</p>
-        <p><strong>School:</strong> ${user.etablissement}</p>
+        <p><strong>University:</strong> ${user.etablissement}</p>
       </div>
 
       <!-- Exam Access -->
@@ -957,14 +964,19 @@ function studentDashboard() {
   const form = document.getElementById("access-link-form");
   form.addEventListener("submit", (event) => {
     event.preventDefault();
+
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
-    const examPath = `take-exam?accessLink=${data.accessLink}`;
+
+    // TODO:
+    const result = startExamSession(data.accessLink);
+    console.log("results:", result);
+    const examPath = `take-exam?accessLink=${data.accessLink.trim()}`;
     window.location.hash = examPath;
   });
 }
 
-function renderExamTaker(accessLink) {
+const renderExamTaker = async (accessLink) => {
   // Create a loading state while we fetch the exam
   previewContainer.innerHTML = `
     <div class="w-full h-full flex flex-col items-center justify-center p-6">
@@ -976,6 +988,7 @@ function renderExamTaker(accessLink) {
   async function initExamTaking() {
     try {
       const result = await fetchExam(accessLink);
+      console.log("exam taker, result is : ", result);
       renderAlert(result.message, result.alertType);
       if (result.alertType === "success") {
         renderExamInterface(result.exam);
@@ -1409,7 +1422,7 @@ function renderExamTaker(accessLink) {
       // Create modal for confirmation
       const modalHTML = `
         <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div class="bg-white dark:bg-zinc-800 rounded-lg p-6 max-w-md w-full">
+          <div class="bg-white dark:bg-zinc-600 rounded-lg p-6 max-w-md w-full dark:text-white border border-zinc-300 dark:border-zinc-500">
             <h3 class="text-xl font-bold mb-4">Finish Exam?</h3>
             ${
               unansweredCount > 0
@@ -1490,7 +1503,9 @@ function renderExamTaker(accessLink) {
         }
       });
 
-      console.log("Submitting exam data:", submissionData);
+      // TODO: save data to db:
+      const result = submitExam(submissionData);
+      console.log("submtting result : ", result);
 
       // Here you would normally call an API to submit the exam
       // For now, just show a success message
@@ -1572,12 +1587,12 @@ function renderExamTaker(accessLink) {
 
   // Start the exam taking process
   initExamTaking();
-}
+};
 
 function renderExamResults(examId) {
   previewContainer.innerHTML = `
-    <div>
-      my exms result
+    <div class="p-4">
+      No exams yet...
     </div>
   `;
 }
@@ -1663,8 +1678,7 @@ export async function renderPreview(previewName) {
       }
       case "exam-results": {
         //TODO:
-        const examId = getParamFromUrl("examId");
-        await renderExamResults(examId);
+        await renderExamResults();
         break;
       }
       case "not-found":

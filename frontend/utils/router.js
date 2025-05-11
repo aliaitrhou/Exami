@@ -34,9 +34,7 @@ const routes = {
     params: ["accessLink"],
   },
   "exam-results": {
-    access: "both",
-    requiresAuth: true,
-    params: ["examId"],
+    access: "student",
   },
 };
 

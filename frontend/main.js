@@ -76,10 +76,6 @@ export function navigationUI() {
   const container = document.getElementById("navigation");
   const user = getUser();
 
-  if (!user) {
-    return;
-  }
-
   container.innerHTML = `
   <div id="links-container" class="space-y-1">
     <a id="dashboard-btn" href="${user.type === "student" ? "#student-dashboard" : "#teacher-dashboard"}" class="w-full text-left px-4 py-2 rounded-md flex items-center bg-emerald-100 dark:bg-violet-900/30 text-emerald-600 dark:text-violet-300">
@@ -93,14 +89,14 @@ export function navigationUI() {
   </div>
 `;
 
-  // if (user.type === "student") {
-  //   document.getElementById("links-container").innerHTML += `
-  //     <a href="#exam-results" id="results-btn" class="w-full text-left px-4 py-2 rounded-md flex items-center hover:bg-gray-100 dark:hover:bg-zinc-700">
-  //       <i class="fas fa-chart-bar mr-2"></i>
-  //       <span>Results</span>
-  //     </a>
-  // `;
-  // }
+  if (user.type === "student") {
+    document.getElementById("links-container").innerHTML += `
+      <a href="#exam-results" id="results-btn" class="w-full text-left px-4 py-2 rounded-md flex items-center hover:bg-gray-100 dark:hover:bg-zinc-700">
+        <i class="fas fa-chart-bar mr-2"></i>
+        <span>Results</span>
+      </a>
+  `;
+  }
 }
 
 function startExami() {

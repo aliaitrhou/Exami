@@ -156,8 +156,8 @@ export const getGithubProfiles = () => {
 
         div.innerHTML = `
         <a href="${link}" target="_blank" class="flex items-center gap-3 rounded px-2 py-1 hover:dark:bg-zinc-700">
-          <img src="${user.avatar_url}" class="rounded-full size-8" width="80">
-          <p>${user.name || user.login}</p>
+          <img src="${user.avatar_url}" class="border rounded-full size-7" width="80">
+          <p class="font-sora text-sm">${user.name || user.login}</p>
         </a>
         `;
 
@@ -255,6 +255,112 @@ export const deleteExam = async (examId) => {
 };
 
 // student actions
+export const startExamSession = async (access_link) => {
+  const geoLocation = await getUserLocation();
+
+  console.log("geoLocation:", geoLocation);
+
+  return fetch(`/api/exams/${access_link}/start`, {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify({
+      geoLocation: geoLocation,
+    }),
+  })
+    .then((res) => {
+      return res.json().then((result) => {
+        console.log("result is (exam session) :", result);
+
+        if (!res.ok) {
+          console.log("error creating session");
+          return {
+            message: "Field to create exam session!",
+            alertType: "error",
+          };
+        }
+
+        return {
+          message: "Exam session created successfully!",
+          alertType: "success",
+        };
+      });
+    })
+    .catch((error) => {
+      console.error("Field to create session, error :", error);
+      return {
+        message: "Field to create exam session!",
+        alertType: "error",
+      };
+    });
+};
+
+const getUserLocation = () => {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      console.warn("Geolocation not supported");
+      resolve(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Location retrieved:", position);
+        const geolocation = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        };
+        resolve(geolocation);
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        resolve(null); // Or reject(error) if you want to handle it upstream
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000, // increase timeout for slow devices
+        maximumAge: 0,
+      },
+    );
+  });
+};
+
+export const submitExam = async (payload) => {
+  return fetch(`/api/exams/${payload.exam_id}/submit`, {
+    method: "POST",
+    headers: {
+      "Content-type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((res) =>
+      res.json().then((result) => {
+        console.log("result is (submit exam):", result);
+
+        if (!res.ok) {
+          return {
+            message: result.message || "Failed to submit exam!",
+            alertType: "error",
+          };
+        }
+
+        return {
+          message: "Exam submitted successfully!",
+          alertType: "success",
+        };
+      }),
+    )
+    .catch((error) => {
+      console.error("Failed to submit exam, error:", error);
+      return {
+        message: "Failed to submit exam!",
+        alertType: "error",
+      };
+    });
+};
+
 export const fetchExam = async (accessLink) => {
   console.log("fetch exam");
   console.log("access link: ", accessLink);
@@ -272,52 +378,7 @@ export const fetchExam = async (accessLink) => {
 
   return {
     exam: exam,
+    message: `Starting Exam: ${accessLink}`,
     alertType: "success",
   };
-
-  // return {
-  //   id: accessLink,
-  //   title: "Math Exam S4",
-  //   description: "Final math exam for semester 4",
-  //   target_audience: "2nd year MIP, S4, Group A",
-  //   questions: [
-  //     {
-  //       id: 1,
-  //       type: "qcm",
-  //       statement: "What is 2 + 2?",
-  //       media_url: null,
-  //       duration: 30,
-  //       score: 5,
-  //       qcm_options: [
-  //         { id: 1, option_text: "3", is_correct: false },
-  //         { id: 2, option_text: "4", is_correct: true },
-  //         { id: 3, option_text: "5", is_correct: false },
-  //       ],
-  //     },
-  //     {
-  //       id: 2,
-  //       type: "direct",
-  //       statement: "Define integral.",
-  //       media_url: null,
-  //       correct_answer: "A mathematical concept...",
-  //       tolerance: 10,
-  //       duration: 60,
-  //       score: 10,
-  //     },
-  //     {
-  //       id: 3,
-  //       type: "qcm",
-  //       statement: "Which of the following are prime numbers?",
-  //       media_url: null,
-  //       duration: 45,
-  //       score: 8,
-  //       qcm_options: [
-  //         { id: 4, option_text: "9", is_correct: false },
-  //         { id: 5, option_text: "11", is_correct: true },
-  //         { id: 6, option_text: "15", is_correct: false },
-  //         { id: 7, option_text: "17", is_correct: true },
-  //       ],
-  //     },
-  //   ],
-  // };
 };
